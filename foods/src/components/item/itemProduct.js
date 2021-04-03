@@ -1,7 +1,9 @@
-import React,  { useEffect, useState } from 'react'
-import { View, Text, StyleSheet, Dimensions, Image, TouchableOpacity } from 'react-native'
+import React,  { useEffect, useState, useRef } from 'react'
+import { View, Text, StyleSheet, Dimensions, Image, TouchableOpacity, Animated } from 'react-native'
 import { useDispatch } from 'react-redux';
 import { increaseTheNumberOfProduct, reduceTheNumberOfProduct, addItemProductToCart } from '../../actions';
+import Modal from '../Modal'
+import AnimationModal from '../Modal/animation'
 
 const windowWidth = Dimensions.get('window').width
 const windowHeight = Dimensions.get('window').height
@@ -20,14 +22,29 @@ if (windowWidth >= 550) {
 
 function ItemProduct({data}) {
     const dispatch = useDispatch();
+    const [ visibleModal, setVisibleModal ] = useState(false)
+    const setup = AnimationModal.setup('scale')
+    const valueAnimation = useRef(new Animated.Value(setup.value)).current
+
+    const openModal = () => {
+        setVisibleModal(!visibleModal)
+        AnimationModal.scale(valueAnimation).start()
+    }
+
+    const closeModal = () => {
+        setTimeout(() => setVisibleModal(!visibleModal), 200) 
+        AnimationModal.scale(valueAnimation).close()
+    }
 
     return(
         <View style={styles.container}>
             <View>
-                <Image 
-                    style={styles.image}
-                    source={{uri: data.image == "" ? "https://manhhunggroup.com.vn/wp-content/themes/biss-child/img/no-image-1.jpg" : data.image}}
-                />
+                <TouchableOpacity onPress={() => openModal()}>
+                    <Image 
+                        style={styles.image}
+                        source={{uri: data.image == "" ? "https://manhhunggroup.com.vn/wp-content/themes/biss-child/img/no-image-1.jpg" : data.image}}
+                    />
+                </TouchableOpacity>
                 <View style={styles.box_price}>
                     <Text style={styles.price}>{data.price}</Text>
                     <Text style={styles.price_unit}> euros</Text>
@@ -61,6 +78,16 @@ function ItemProduct({data}) {
                         </TouchableOpacity>
                     </View>
                 </View>
+                <Modal 
+                    visible={visibleModal} 
+                    onCloseModal={() => closeModal()}
+                    onCloseTouchOutSide={true}
+                    onCloseTopRight={true}
+                    typeModal={{type: "basic", title: "Title modal product", content: "Content modal product"}}
+                    valueAnimation={valueAnimation}
+                    useAnimation={true}
+                    typeAnimation={setup.type}
+                />
             </View>
         </View>
     )
@@ -153,7 +180,7 @@ const styles = StyleSheet.create({
     },
     number_product: {
         fontSize: FONT_SIZE_NUMBER_PRODUCT,
-    }
+    },
 })
 
 export default ItemProduct
