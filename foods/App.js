@@ -10,6 +10,7 @@ const store = configureStore()
 
 const Stack = createStackNavigator();
 
+
 function App() {
   return (
     <Provider store={store}>
